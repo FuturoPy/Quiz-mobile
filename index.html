@@ -12,11 +12,9 @@
     --safe-bottom:env(safe-area-inset-bottom,0px);
   }
 
-  /* Reset / base */
   html,body{height:100%; width:100%; margin:0; padding:0; background:var(--bg); color:var(--white); -webkit-text-size-adjust:100%;}
   body{font-family:"Comic Sans MS", Arial, Helvetica, sans-serif; overflow:hidden; padding-top:var(--safe-top); padding-bottom:var(--safe-bottom);}
 
-  /* TELA INICIAL e PARTICULAS */
   #tela-inicial{
     position:fixed; inset:0;
     background-image:url('https://uploads.onecompiler.io/444jywmud/444jyqxv3/inico%20de%20tela.png');
@@ -27,7 +25,6 @@
   }
   #particles{ position:fixed; inset:0; pointer-events:none; z-index:1; }
 
-  /* Start */
   #start-btn{
     position:fixed;
     left:50%;
@@ -46,7 +43,6 @@
     box-shadow:0 6px 20px rgba(0,0,0,0.6);
   }
 
-  /* QUIZ container */
   .quiz-container{
     display:none; position:fixed; inset:0; padding:12px; align-items:center; justify-content:center;
     background-image:url('https://uploads.onecompiler.io/444jywmud/444jyqxv3/sala%20de%20aulas.png');
@@ -78,13 +74,11 @@
   .feedback.correct{ color:#8ef5c9 }
   .feedback.wrong{ color:#ffb3b3 }
 
-  /* professor login / editor */
   #professor-login, #cadastro-perguntas{ position:fixed; left:50%; transform:translateX(-50%); z-index:30; background:rgba(0,0,0,0.7); padding:12px; border-radius:14px; color:var(--white); width:calc(100% - 40px); max-width:760px; box-shadow:0 10px 30px rgba(0,0,0,0.6); }
   #professor-login input{ padding:10px 12px; border-radius:10px; border:none; width:60%; max-width:360px; margin-right:8px; }
   #cadastro-perguntas{ top:12px; display:none; max-height:60vh; overflow:auto; }
   #btn-sair-edicao{ position:fixed; top:calc(8px + var(--safe-top)); right:12px; z-index:40; display:none; background:#ff5252; color:white; border:none; padding:10px 12px; border-radius:10px; font-weight:700; }
 
-  /* overlay final (quando criado) */
   .overlay-final{
     position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:90;
     background:rgba(0,0,0,0.6);
@@ -100,7 +94,6 @@
   }
   .overlay-title{ font-size:20px; text-align:center; color:white; text-shadow:0 2px 6px rgba(0,0,0,0.7); }
 
-  /* imagens (badge/back button) */
   .img-badge{ width:200px; max-width:60%; border-radius:12px; }
   .btn-img{ width:220px; max-width:70%; cursor:pointer; margin-top:8px; }
 
@@ -108,7 +101,6 @@
   @keyframes jump{0%{transform:translateY(0)}50%{transform:translateY(-12px)}100%{transform:translateY(0)}}
   @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
 
-  /* Mobile */
   @media (max-width:430px){
     .area-jogo{ flex-direction:column; gap:14px; padding:12px; }
     .professor{ width:56vw; }
@@ -123,21 +115,18 @@
 </head>
 <body>
 
-<!-- Tela Inicial + particles -->
 <div id="tela-inicial">
   <canvas id="particles"></canvas>
 </div>
 
 <button id="start-btn" aria-label="Iniciar Quiz">START</button>
 
-<!-- Login professor -->
 <div id="professor-login" role="dialog" aria-label="Acesso do professor" style="top:12px;">
   <input id="senha-professor" type="password" placeholder="Senha do professor" aria-label="Senha do professor" />
   <button onclick="entrarProfessor()">Entrar</button>
   <small style="display:block;opacity:.7;margin-top:6px">Somente professor pode editar. Toque START para os alunos iniciarem.</small>
 </div>
 
-<!-- Editor perguntas (visível só ao professor) -->
 <div id="cadastro-perguntas">
   <h3>Adicionar / Editar Pergunta</h3>
   <input id="nova-pergunta" type="text" placeholder="Digite a pergunta" />
@@ -157,10 +146,8 @@
   <div id="lista-perguntas" style="margin-top:10px"></div>
 </div>
 
-<!-- Botão Sair edição -->
 <button id="btn-sair-edicao" onclick="sairEdicao()">SAIR</button>
 
-<!-- Quiz -->
 <div class="quiz-container" id="quiz-container" role="application" aria-label="Quiz">
   <div class="area-jogo">
     <div class="professor" id="professor" aria-hidden="true"></div>
@@ -173,19 +160,16 @@
 </div>
 
 <script>
-/* ---------------- PRELOAD IMAGENS (evita problema de não aparecer) ---------------- */
+/* ---------- lógica completa do quiz ---------- */
 const IMGS = {
-  badge: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/Captura%20de%20tela%202025-11-14%20003933.png', // conquista
-  telaFinal: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/tela%20final.png', // fundo final
-  botaoVoltar: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/botao%20de%20voltar.png', // botão voltar
-  joinhaa: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/joinhaa.png', // imagem certa (caso queira)
-  errada: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/errada.png' // imagem errada (se usar)
+  badge: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/Captura%20de%20tela%202025-11-14%20003933.png',
+  telaFinal: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/tela%20final.png',
+  botaoVoltar: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/botao%20de%20voltar.png',
+  joinhaa: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/joinhaa.png',
+  errada: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/errada.png'
 };
-Object.values(IMGS).forEach(u=>{
-  const i=new Image(); i.src=u;
-});
+Object.values(IMGS).forEach(u=>{ const i=new Image(); i.src=u; });
 
-/* ---------------- PARTICULAS (leve) ---------------- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 function resizeCanvas(){ canvas.width = innerWidth; canvas.height = innerHeight; }
@@ -193,12 +177,10 @@ resizeCanvas(); addEventListener('resize', resizeCanvas);
 let mouse={x:null,y:null};
 addEventListener('touchmove', e=>{ const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY },{passive:true});
 addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY });
-
 class Particle{ constructor(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*1.8+0.8; this.base=this.size; this.vx=(Math.random()-0.5)*0.4; this.vy=(Math.random()-0.5)*0.4; this.o=Math.random()*0.6+0.2 } update(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>canvas.width)this.vx*=-1; if(this.y<0||this.y>canvas.height)this.vy*=-1; if(mouse.x&&mouse.y){ const dx=mouse.x-this.x, dy=mouse.y-this.y, d=Math.sqrt(dx*dx+dy*dy); if(d<80){ this.size=this.base+(80-d)/40; this.o=Math.min(1, this.o+(80-d)/200)} else{ this.size=this.base; this.o=this.o } } } draw(){ ctx.beginPath(); ctx.fillStyle='rgba(255,255,150,'+this.o+')'; ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); } }
 const parts=[]; for(let i=0;i<60;i++) parts.push(new Particle());
 (function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); parts.forEach(p=>{p.update();p.draw()}); requestAnimationFrame(loop) })();
 
-/* ---------------- APP LOGIC (mantive sua lógica) ---------------- */
 let imgFrames = [
   "https://uploads.onecompiler.io/444jywmud/444jyqxv3/professora%20frame%201.png",
   "https://uploads.onecompiler.io/444jywmud/444jyqxv3/professora%20frame%202.png",
@@ -206,7 +188,6 @@ let imgFrames = [
 ];
 let imgCerta = IMGS.joinhaa;
 let imgErrada = IMGS.errada;
-
 let perguntas = [], indice=0, pontuacao=0, escreverVelocidade=60;
 const professorEl = document.getElementById('professor');
 const feedbackEl = document.getElementById('feedback');
@@ -216,15 +197,12 @@ const startBtn = document.getElementById('start-btn');
 const btnSair = document.getElementById('btn-sair-edicao');
 const listaPerguntasEl = document.getElementById('lista-perguntas');
 
-/* Load from localStorage */
 function salvarPerguntas(){ try{ localStorage.setItem('perguntasQuiz', JSON.stringify(perguntas)); }catch(e){ console.warn(e) } }
 function carregarPerguntas(){ const d = localStorage.getItem('perguntasQuiz'); if(d){ try{ perguntas = JSON.parse(d) || []; atualizarCadastro(); }catch(e){ console.warn('JSON inválido') } } }
 carregarPerguntas();
 
-/* Editor / Professor */
 function entrarProfessor(){
   const senha = document.getElementById('senha-professor').value.trim();
-  // mantém validação (senha ainda existe no código), mas não mostramos exemplo no placeholder
   if(senha === "2702"){
     document.getElementById('cadastro-perguntas').style.display = 'block';
     btnSair.style.display = 'block';
@@ -232,9 +210,7 @@ function entrarProfessor(){
     atualizarCadastro();
     professorEl.style.display = 'block';
     professorEl.style.backgroundImage = `url(${imgFrames[0]})`;
-  } else {
-    alert('Senha incorreta');
-  }
+  } else { alert('Senha incorreta'); }
 }
 function sairEdicao(){
   document.getElementById('cadastro-perguntas').style.display = 'none';
@@ -242,8 +218,6 @@ function sairEdicao(){
   document.getElementById('senha-professor').value = '';
   btnSair.style.display = 'none';
 }
-
-/* Add / Edit / Remove */
 function adicionarPergunta(){
   const pergunta = document.getElementById('nova-pergunta').value.trim();
   const op1 = document.getElementById('alt1').value.trim();
@@ -255,17 +229,14 @@ function adicionarPergunta(){
   document.getElementById('nova-pergunta').value=''; document.getElementById('alt1').value=''; document.getElementById('alt2').value=''; document.getElementById('alt3').value='';
   salvarPerguntas(); atualizarCadastro();
 }
-
 function atualizarCadastro(){
   listaPerguntasEl.innerHTML = '';
   perguntas.forEach((p,i)=>{
     const item = document.createElement('div');
     item.style.display='flex'; item.style.justifyContent='space-between'; item.style.alignItems='center';
     item.style.padding='8px'; item.style.borderTop='1px dashed rgba(255,255,255,0.06)';
-    const left = document.createElement('div');
-    left.innerHTML = `<strong>${i+1}.</strong> ${p.pergunta}`;
-    const right = document.createElement('div');
-    right.style.display='flex'; right.style.gap='8px';
+    const left = document.createElement('div'); left.innerHTML = `<strong>${i+1}.</strong> ${p.pergunta}`;
+    const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
     const edit = document.createElement('button'); edit.textContent='Editar'; edit.style.padding='6px 8px'; edit.onclick = ()=>{ 
       document.getElementById('nova-pergunta').value = p.pergunta;
       document.getElementById('alt1').value = p.opcoes[0];
@@ -275,20 +246,15 @@ function atualizarCadastro(){
       perguntas.splice(i,1);
       salvarPerguntas(); atualizarCadastro();
     };
-    const del = document.createElement('button'); del.textContent='Remover'; del.style.padding='6px 8px'; del.onclick = ()=>{
-      if(confirm('Remover pergunta?')){ perguntas.splice(i,1); salvarPerguntas(); atualizarCadastro(); }
-    };
-    right.appendChild(edit); right.appendChild(del);
-    item.appendChild(left); item.appendChild(right);
+    const del = document.createElement('button'); del.textContent='Remover'; del.style.padding='6px 8px'; del.onclick = ()=>{ if(confirm('Remover pergunta?')){ perguntas.splice(i,1); salvarPerguntas(); atualizarCadastro(); }};
+    right.appendChild(edit); right.appendChild(del); item.appendChild(left); item.appendChild(right);
     listaPerguntasEl.appendChild(item);
   });
 }
 
-/* START quiz */
 startBtn.addEventListener('click', ()=>{
   if(perguntas.length===0){ alert('Adicione pelo menos uma pergunta antes de iniciar.'); return; }
-  telaInicial.style.opacity = 0;
-  startBtn.style.opacity = 0;
+  telaInicial.style.opacity = 0; startBtn.style.opacity = 0;
   setTimeout(()=>{
     telaInicial.style.display='none';
     document.getElementById('professor-login').style.display='none';
@@ -303,7 +269,6 @@ startBtn.addEventListener('click', ()=>{
   }, 450);
 });
 
-/* writing animation */
 let escreverIntervalo = null;
 function escreverNoQuadro(el, texto){
   el.textContent = '';
@@ -326,15 +291,12 @@ async function mostrarPergunta(){
   const respostasDiv = document.getElementById('answers'); respostasDiv.innerHTML = ''; feedbackEl.textContent='';
   await escreverNoQuadro(document.getElementById('question'), q.pergunta);
   q.opcoes.forEach((opt, i)=>{
-    const b = document.createElement('button');
-    b.textContent = opt;
-    b.setAttribute('role','listitem');
+    const b = document.createElement('button'); b.textContent = opt; b.setAttribute('role','listitem');
     b.onclick = ()=> checkAnswer(i === q.certa, b);
     respostasDiv.appendChild(b);
   });
 }
 
-/* resposta */
 function checkAnswer(certa, btnEl){
   professorEl.style.animation = '';
   if(certa){
@@ -348,86 +310,32 @@ function checkAnswer(certa, btnEl){
   }
 }
 
-/* fim e reset - AQUI MODIFICAÇÕES PRINCIPAIS PARA GARANTIR QUE TELA FINAL APAREÇA */
 function mostrarFim(){
-  // remove overlay anterior se existir
-  const prev = document.getElementById('tela-fim-overlay');
-  if(prev) prev.remove();
-
-  // overlay wrapper
-  const overlay = document.createElement('div');
-  overlay.id = 'tela-fim-overlay';
-  overlay.className = 'overlay-final';
-
-  // card com imagem de fundo (tela final)
-  const card = document.createElement('div');
-  card.className = 'overlay-card';
-  // usamos a imagem de fundo fornecida (tela final.png)
-  card.style.backgroundImage = `url("${IMGS.telaFinal}")`;
-
-  // conteúdo escuro por cima para legibilidade
-  const inner = document.createElement('div');
-  inner.className = 'overlay-inner';
-
-  // title / texto
-  const title = document.createElement('div');
-  title.className = 'overlay-title';
-
+  const prev = document.getElementById('tela-fim-overlay'); if(prev) prev.remove();
+  const overlay = document.createElement('div'); overlay.id = 'tela-fim-overlay'; overlay.className = 'overlay-final';
+  const card = document.createElement('div'); card.className = 'overlay-card'; card.style.backgroundImage = `url("${IMGS.telaFinal}")`;
+  const inner = document.createElement('div'); inner.className = 'overlay-inner';
+  const title = document.createElement('div'); title.className = 'overlay-title';
   if(pontuacao === perguntas.length){
     title.innerHTML = `Parabéns! Você desbloqueou: <b>Nota 10</b>`;
-    // mostra badge de conquista
-    const badge = document.createElement('img');
-    badge.className = 'img-badge';
-    badge.src = IMGS.badge;
-    badge.alt = 'Conquista Nota 10';
-    inner.appendChild(title);
-    inner.appendChild(badge);
-    // botão voltar como imagem (usamos imagem do botão que você mandou)
-    const btnImg = document.createElement('img');
-    btnImg.className = 'btn-img';
-    btnImg.src = IMGS.botaoVoltar;
-    btnImg.alt = 'Voltar';
-    btnImg.onclick = ()=>{ overlay.remove(); resetarJogo(); };
-    // adiciona espaçamento e botão
-    inner.appendChild(btnImg);
-  } else {
-    title.innerHTML = `Fim do Quiz! Você acertou ${pontuacao} de ${perguntas.length}.`;
-    inner.appendChild(title);
-    // mostrar o botão voltar (imagem)
-    const btnImg = document.createElement('img');
-    btnImg.className = 'btn-img';
-    btnImg.src = IMGS.botaoVoltar;
-    btnImg.alt = 'Voltar';
-    btnImg.onclick = ()=>{ overlay.remove(); resetarJogo(); };
-    inner.appendChild(btnImg);
-  }
-
-  // monta tudo
-  card.appendChild(inner);
-  overlay.appendChild(card);
-  document.body.appendChild(overlay);
-
-  // esconder quiz
+    const badge = document.createElement('img'); badge.className = 'img-badge'; badge.src = IMGS.badge; badge.alt = 'Conquista Nota 10';
+    inner.appendChild(title); inner.appendChild(badge);
+  } else { title.innerHTML = `Fim do Quiz! Você acertou ${pontuacao} de ${perguntas.length}.`; inner.appendChild(title); }
+  const btnImg = document.createElement('img'); btnImg.className = 'btn-img'; btnImg.src = IMGS.botaoVoltar; btnImg.alt = 'Voltar';
+  btnImg.onclick = ()=>{ overlay.remove(); resetarJogo(); }; inner.appendChild(btnImg);
+  card.appendChild(inner); overlay.appendChild(card); document.body.appendChild(overlay);
   quizContainer.style.display = 'none';
 }
 
-/* reset */
 function resetarJogo(){
-  // remove overlay se houver
   const fimExist = document.getElementById('tela-fim-overlay'); if(fimExist) fimExist.remove();
-
-  telaInicial.style.display = 'flex';
-  telaInicial.style.opacity = 1;
-  startBtn.style.opacity = 1;
-  indice = 0; pontuacao = 0;
+  telaInicial.style.display = 'flex'; telaInicial.style.opacity = 1;
+  startBtn.style.opacity = 1; indice = 0; pontuacao = 0;
   quizContainer.style.display = 'none';
   document.getElementById('question').textContent=''; document.getElementById('answers').innerHTML=''; feedbackEl.textContent='';
 }
 
-/* ESC para sair do modo professor */
 document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') sairEdicao(); });
-
-/* Accessibility: focus start button for easier keyboard users */
 if(startBtn) startBtn.focus();
 </script>
 
