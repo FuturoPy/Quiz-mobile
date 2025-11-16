@@ -16,22 +16,18 @@
   html,body{height:100%; width:100%; margin:0; padding:0; background:var(--bg); color:var(--white); -webkit-text-size-adjust:100%;}
   body{font-family:"Comic Sans MS", Arial, Helvetica, sans-serif; overflow:hidden; padding-top:var(--safe-top); padding-bottom:var(--safe-bottom);}
 
-  /* TELA INICIAL e PARTICULAS
-     - tela-inicial tem o background (imagem)
-     - canvas fica sobre a imagem, mas abaixo dos controles (z-index)
-  */
+  /* TELA INICIAL e PARTICULAS */
   #tela-inicial{
     position:fixed; inset:0;
     background-image:url('https://uploads.onecompiler.io/444jywmud/444jyqxv3/inico%20de%20tela.png');
     background-size:cover; background-position:center;
     display:flex; align-items:center; justify-content:center;
     transition:opacity .5s ease;
-    z-index:0; /* background layer */
+    z-index:0;
   }
-  /* canvas deve cobrir toda a área, mas não esconder outros elementos */
   #particles{ position:fixed; inset:0; pointer-events:none; z-index:1; }
 
-  /* botão START deve ficar acima do canvas (z-index maior) */
+  /* Start */
   #start-btn{
     position:fixed;
     left:50%;
@@ -50,7 +46,7 @@
     box-shadow:0 6px 20px rgba(0,0,0,0.6);
   }
 
-  /* QUIZ container: inicialmente escondido */
+  /* QUIZ container */
   .quiz-container{
     display:none; position:fixed; inset:0; padding:12px; align-items:center; justify-content:center;
     background-image:url('https://uploads.onecompiler.io/444jywmud/444jyqxv3/sala%20de%20aulas.png');
@@ -88,14 +84,31 @@
   #cadastro-perguntas{ top:12px; display:none; max-height:60vh; overflow:auto; }
   #btn-sair-edicao{ position:fixed; top:calc(8px + var(--safe-top)); right:12px; z-index:40; display:none; background:#ff5252; color:white; border:none; padding:10px 12px; border-radius:10px; font-weight:700; }
 
-  /* tela final overlay genérica (criamos dinamicamente) */
+  /* overlay final (quando criado) */
+  .overlay-final{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:90;
+    background:rgba(0,0,0,0.6);
+    padding:20px;
+  }
+  .overlay-card{
+    width:min(880px,94%); max-width:720px; height:auto; border-radius:18px; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    background-position:center; background-size:cover; box-shadow:0 12px 40px rgba(0,0,0,0.7);
+  }
+  .overlay-inner{
+    width:100%; padding:22px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+    background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.5));
+  }
+  .overlay-title{ font-size:20px; text-align:center; color:white; text-shadow:0 2px 6px rgba(0,0,0,0.7); }
 
-  /* animações */
+  /* imagens (badge/back button) */
+  .img-badge{ width:200px; max-width:60%; border-radius:12px; }
+  .btn-img{ width:220px; max-width:70%; cursor:pointer; margin-top:8px; }
+
   @keyframes idle{0%{transform:translateY(0)}50%{transform:translateY(-4px)}100%{transform:translateY(0)}}
   @keyframes jump{0%{transform:translateY(0)}50%{transform:translateY(-12px)}100%{transform:translateY(0)}}
   @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
 
-  /* Mobile adjustments (incl. iPhone 13 size) */
+  /* Mobile */
   @media (max-width:430px){
     .area-jogo{ flex-direction:column; gap:14px; padding:12px; }
     .professor{ width:56vw; }
@@ -103,8 +116,9 @@
     #question{ font-size:18px; }
     #answers button{ font-size:16px; padding:12px; }
     #start-btn{ font-size:20px; padding:12px 22px; bottom:calc(16px + var(--safe-bottom)); }
+    .img-badge{ width:160px; }
+    .btn-img{ width:160px; }
   }
-
 </style>
 </head>
 <body>
@@ -159,6 +173,18 @@
 </div>
 
 <script>
+/* ---------------- PRELOAD IMAGENS (evita problema de não aparecer) ---------------- */
+const IMGS = {
+  badge: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/Captura%20de%20tela%202025-11-14%20003933.png', // conquista
+  telaFinal: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/tela%20final.png', // fundo final
+  botaoVoltar: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/botao%20de%20voltar.png', // botão voltar
+  joinhaa: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/joinhaa.png', // imagem certa (caso queira)
+  errada: 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/errada.png' // imagem errada (se usar)
+};
+Object.values(IMGS).forEach(u=>{
+  const i=new Image(); i.src=u;
+});
+
 /* ---------------- PARTICULAS (leve) ---------------- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
@@ -178,8 +204,8 @@ let imgFrames = [
   "https://uploads.onecompiler.io/444jywmud/444jyqxv3/professora%20frame%202.png",
   "https://uploads.onecompiler.io/444jywmud/444jyqxv3/professora%20frame%203.png"
 ];
-let imgCerta = "https://uploads.onecompiler.io/444jywmud/444jyqxv3/joinhaa.png";
-let imgErrada = "https://uploads.onecompiler.io/444jywmud/444jyqxv3/errada.png";
+let imgCerta = IMGS.joinhaa;
+let imgErrada = IMGS.errada;
 
 let perguntas = [], indice=0, pontuacao=0, escreverVelocidade=60;
 const professorEl = document.getElementById('professor');
@@ -198,7 +224,7 @@ carregarPerguntas();
 /* Editor / Professor */
 function entrarProfessor(){
   const senha = document.getElementById('senha-professor').value.trim();
-  // Mantive validação mas sem mostrar a senha como exemplo
+  // mantém validação (senha ainda existe no código), mas não mostramos exemplo no placeholder
   if(senha === "2702"){
     document.getElementById('cadastro-perguntas').style.display = 'block';
     btnSair.style.display = 'block';
@@ -322,56 +348,80 @@ function checkAnswer(certa, btnEl){
   }
 }
 
-/* fim e reset */
+/* fim e reset - AQUI MODIFICAÇÕES PRINCIPAIS PARA GARANTIR QUE TELA FINAL APAREÇA */
 function mostrarFim(){
-  // cria overlay bonito e centralizado
-  const fimDiv = document.createElement('div');
-  fimDiv.id = 'tela-fim';
-  fimDiv.style.position = 'fixed';
-  fimDiv.style.inset = '0';
-  fimDiv.style.display = 'flex';
-  fimDiv.style.flexDirection = 'column';
-  fimDiv.style.justifyContent = 'center';
-  fimDiv.style.alignItems = 'center';
-  fimDiv.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.9))';
-  fimDiv.style.color = 'white';
-  fimDiv.style.zIndex = 80;
-  fimDiv.style.padding = '20px';
+  // remove overlay anterior se existir
+  const prev = document.getElementById('tela-fim-overlay');
+  if(prev) prev.remove();
+
+  // overlay wrapper
+  const overlay = document.createElement('div');
+  overlay.id = 'tela-fim-overlay';
+  overlay.className = 'overlay-final';
+
+  // card com imagem de fundo (tela final)
+  const card = document.createElement('div');
+  card.className = 'overlay-card';
+  // usamos a imagem de fundo fornecida (tela final.png)
+  card.style.backgroundImage = `url("${IMGS.telaFinal}")`;
+
+  // conteúdo escuro por cima para legibilidade
+  const inner = document.createElement('div');
+  inner.className = 'overlay-inner';
+
+  // title / texto
+  const title = document.createElement('div');
+  title.className = 'overlay-title';
+
   if(pontuacao === perguntas.length){
-    const txt = document.createElement('div');
-    txt.innerHTML = `Parabéns! Você desbloqueou: <b>Nota 10</b>`;
-    txt.style.fontSize = '20px'; txt.style.textAlign = 'center'; txt.style.marginBottom = '12px';
-    fimDiv.appendChild(txt);
-    const img = document.createElement('img');
-    img.src = 'https://uploads.onecompiler.io/444jywmud/444jyqxv3/joinhaa.png';
-    img.style.width = '180px'; img.style.borderRadius = '12px'; img.style.marginBottom = '12px';
-    fimDiv.appendChild(img);
+    title.innerHTML = `Parabéns! Você desbloqueou: <b>Nota 10</b>`;
+    // mostra badge de conquista
+    const badge = document.createElement('img');
+    badge.className = 'img-badge';
+    badge.src = IMGS.badge;
+    badge.alt = 'Conquista Nota 10';
+    inner.appendChild(title);
+    inner.appendChild(badge);
+    // botão voltar como imagem (usamos imagem do botão que você mandou)
+    const btnImg = document.createElement('img');
+    btnImg.className = 'btn-img';
+    btnImg.src = IMGS.botaoVoltar;
+    btnImg.alt = 'Voltar';
+    btnImg.onclick = ()=>{ overlay.remove(); resetarJogo(); };
+    // adiciona espaçamento e botão
+    inner.appendChild(btnImg);
   } else {
-    const txt = document.createElement('div');
-    txt.innerHTML = `Fim do Quiz! Você acertou ${pontuacao} de ${perguntas.length}.`;
-    txt.style.fontSize='20px'; txt.style.textAlign = 'center'; txt.style.marginBottom = '12px';
-    fimDiv.appendChild(txt);
+    title.innerHTML = `Fim do Quiz! Você acertou ${pontuacao} de ${perguntas.length}.`;
+    inner.appendChild(title);
+    // mostrar o botão voltar (imagem)
+    const btnImg = document.createElement('img');
+    btnImg.className = 'btn-img';
+    btnImg.src = IMGS.botaoVoltar;
+    btnImg.alt = 'Voltar';
+    btnImg.onclick = ()=>{ overlay.remove(); resetarJogo(); };
+    inner.appendChild(btnImg);
   }
-  const btn = document.createElement('button');
-  btn.textContent = 'Voltar';
-  btn.style.padding = '12px 18px';
-  btn.style.marginTop = '12px';
-  btn.onclick = ()=>{ fimDiv.remove(); resetarJogo(); };
-  fimDiv.appendChild(btn);
-  document.body.appendChild(fimDiv);
+
+  // monta tudo
+  card.appendChild(inner);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
   // esconder quiz
   quizContainer.style.display = 'none';
 }
 
 /* reset */
 function resetarJogo(){
+  // remove overlay se houver
+  const fimExist = document.getElementById('tela-fim-overlay'); if(fimExist) fimExist.remove();
+
   telaInicial.style.display = 'flex';
   telaInicial.style.opacity = 1;
   startBtn.style.opacity = 1;
   indice = 0; pontuacao = 0;
   quizContainer.style.display = 'none';
   document.getElementById('question').textContent=''; document.getElementById('answers').innerHTML=''; feedbackEl.textContent='';
-  const fimExist = document.getElementById('tela-fim'); if(fimExist) fimExist.remove();
 }
 
 /* ESC para sair do modo professor */
