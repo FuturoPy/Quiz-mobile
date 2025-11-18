@@ -14,6 +14,33 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
 #start-btn { position: fixed; top:55%; left:50%; transform:translate(-50%,-50%); font-size:36px; font-weight:bold; color:white; background-color: rgba(0,0,0,0.6); border:none; border-radius:15px; padding:20px 60px; cursor:pointer; transition:0.3s; z-index:10; }
 #start-btn:hover{ color:#00ffff; }
 
+/* Botões de Mute (usando as imagens que você enviou) */
+#controle-audio {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: auto;
+  z-index: 10050; /* alto para aparecer sobre tudo */
+  display:flex;
+  gap: 8px;
+  align-items:center;
+}
+
+/* imagens do usuário */
+#btn-user-off, #btn-user-on {
+  width: 90px;
+  height: auto;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: transform .15s;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  border-radius:8px;
+  background: rgba(0,0,0,0.2);
+  padding:4px;
+}
+#btn-user-off:hover, #btn-user-on:hover { transform: scale(1.06); }
+
 /* Quiz */
 .quiz-container { display:none; width:100%; height:100vh; background-image:url('https://uploads.onecompiler.io/444jywmud/444jyqxv3/sala%20de%20aulas.png'); background-size:cover; background-position:center; display:flex; justify-content:center; align-items:center; opacity:0; transition:opacity 1s ease; }
 .area-jogo { display:flex; justify-content:center; align-items:center; gap:50px; padding:20px; box-sizing:border-box; }
@@ -33,7 +60,7 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
 #answers button:hover { background-color:rgba(255,255,255,0.2); transform:scale(1.03); }
 #answers button:disabled { cursor:not-allowed; opacity:0.55; transform:none; }
 
-/* Marca a alternativa que o aluno escolheu */
+/* Marca */
 #answers button.selecionada { box-shadow: 0 0 12px #ffffff40; transform: none; }
 #answers button.correta { color:#00ff99; border-color:#00ff99; text-shadow:none; font-weight:bold; }
 #answers button.errada { color:#ff9999; border-color:#ff9999; text-shadow:none; font-weight:bold; }
@@ -48,15 +75,16 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
 #quiz-controles img { width:150px; cursor:pointer; transition:0.3s; }
 #quiz-controles img:hover { transform:scale(1.1); }
 
-/* Professor Login / Cadastro */
+/* Login professor */
 #professor-login { position:fixed; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:white; padding:15px; border-radius:15px; z-index:20; }
 #cadastro-perguntas { display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:white; padding:20px; border-radius:15px; z-index:20; max-height:60vh; overflow-y:auto; width:320px; box-sizing:border-box; }
-#cadastro-perguntas input, #cadastro-perguntas select { margin:5px; padding:6px; border-radius:5px; border:none; width:calc(100% - 12px); box-sizing:border-box; }
-#cadastro-perguntas button { margin-top:8px; padding:8px 10px; border-radius:10px; cursor:pointer; width:100%; }
+
+/* Botão sair */
 #btn-sair-edicao { position: fixed; top: 8px; right: 8px; padding: 10px 14px; background-color: #ff4444; color: #fff; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; z-index: 99999; display: none; }
 
-/* Responsividade */
+/* Responsivo */
 @media (max-width:900px){
+  #controle-audio { right: 10px; bottom: 10px; }
   .area-jogo { flex-direction:column; gap:20px; }
   .professor { width:260px; height:320px; }
   .quadro-fundo { width:90vw; height:auto; padding:16px; }
@@ -65,6 +93,25 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
 </style>
 </head>
 <body>
+
+<!-- Música de elevador relaxante -->
+<audio id="musica-fundo" loop>
+  <source src="https://files.catbox.moe/6t7x4j.mp3" type="audio/mpeg">
+  Seu navegador não suporta áudio.
+</audio>
+
+<!-- CONTROLE DE ÁUDIO: uso as imagens que você mandou -->
+<div id="controle-audio">
+  <!-- imagem 1 (por exemplo: som ligado) -->
+  <img id="btn-user-on"
+       src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/Captura%20de%20tela%202025-11-18%20203955.png"
+       alt="som ligado (clique para mutar)">
+  <!-- imagem 2 (por exemplo: som mutado) -->
+  <img id="btn-user-off"
+       src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/Captura%20de%20tela%202025-11-18%20204125.png"
+       alt="som mutado (clique para ativar)"
+       style="display:none">
+</div>
 
 <div id="tela-inicial"><canvas id="particles"></canvas></div>
 <button id="start-btn">START</button>
@@ -75,7 +122,7 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
   <button onclick="entrarProfessor()">Entrar</button>
 </div>
 
-<!-- Cadastro de perguntas -->
+<!-- Cadastro -->
 <div id="cadastro-perguntas">
   <h3 style="margin:0 0 8px 0;">Adicionar Pergunta</h3>
   <input type="text" id="nova-pergunta" placeholder="Digite a pergunta"/>
@@ -90,9 +137,9 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
   <button onclick="adicionarPergunta()">Adicionar Pergunta</button>
 </div>
 
-<!-- Botão sair edição -->
 <button id="btn-sair-edicao" onclick="sairEdicao()">SAIR</button>
 
+<!-- Quiz -->
 <div class="quiz-container" id="quiz-container">
   <div class="area-jogo">
     <div class="professor" id="professor"></div>
@@ -103,17 +150,16 @@ body { margin:0; padding:0; font-family:"Comic Sans MS", Arial, sans-serif; back
       <div id="feedback" class="feedback"></div>
 
       <div id="quiz-controles">
-        <img id="btn-voltar-pergunta" src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/voltar%20pergunta.png" alt="Voltar Pergunta">
-        <img id="btn-avancar-pergunta" src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/avan%C3%A7ar%20pergunta.png" alt="Avançar Pergunta">
-        <img id="btn-terminar" src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/terminar.png" alt="Terminar Quiz">
+        <img id="btn-voltar-pergunta" src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/voltar%20pergunta.png" alt="Voltar">
+        <img id="btn-avancar-pergunta" src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/avan%C3%A7ar%20pergunta.png" alt="Avançar">
+        <img id="btn-terminar" src="https://uploads.onecompiler.io/444jywmud/444jyqxv3/terminar.png" alt="Terminar">
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ========== PARTICULAS ==========
+/* ================= PARTICULAS (mesmo do seu código) ================= */
 const canvas = document.getElementById("particles"), ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth; canvas.height = window.innerHeight;
 window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
@@ -146,7 +192,33 @@ const particlesArray=[]; for(let i=0;i<80;i++) particlesArray.push(new Particle(
 function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
 animateParticles();
 
-// ========== IMAGENS E ELEMENTOS ==========
+/* ================= CONTROLE DE ÁUDIO usando as imagens que você mandou ================= */
+const musica = document.getElementById("musica-fundo");
+const btnUserOn = document.getElementById("btn-user-on");   // imagem exibida inicialmente
+const btnUserOff = document.getElementById("btn-user-off"); // imagem para estado invertido
+
+// reduzir volume padrão para ficar suave
+musica.volume = 0.35;
+
+// tenta tocar automaticamente (pode ser bloqueado em alguns navegadores)
+musica.play().catch(()=>{ /* autoplay bloqueado — OK */ });
+
+// estado inicial: som ligado (imagem 'on' visível)
+btnUserOn.addEventListener('click', () => {
+  // quando clicar na imagem 'on', vamos MUTAR e mostrar a imagem 'off'
+  musica.muted = true;
+  btnUserOn.style.display = 'none';
+  btnUserOff.style.display = 'inline-block';
+});
+
+btnUserOff.addEventListener('click', () => {
+  // quando clicar na imagem 'off', DESMUTA e volta a imagem 'on'
+  musica.muted = false;
+  btnUserOff.style.display = 'none';
+  btnUserOn.style.display = 'inline-block';
+});
+
+/* ================= VARIÁVEIS GERAIS DO JOGO (mantidas do seu código) ================= */
 let imgFrames = [
   "https://uploads.onecompiler.io/444jywmud/444jyqxv3/professora%20frame%201.png",
   "https://uploads.onecompiler.io/444jywmud/444jyqxv3/professora%20frame%202.png",
@@ -156,8 +228,6 @@ let imgCerta = "https://uploads.onecompiler.io/444jywmud/444jyqxv3/joinhaa.png";
 let imgErrada = "https://uploads.onecompiler.io/444jywmud/444jyqxv3/errada.png";
 
 let perguntas = [], indice = 0, pontuacao = 0, escreverVelocidade = 100;
-// guarda quais perguntas já foram respondidas e com qual escolha
-// formato: { 0: { choice: 1, correct: true }, 2: { choice: 0, correct: false } }
 let perguntasRespondidas = {};
 
 let professorEl = document.getElementById("professor");
@@ -167,12 +237,12 @@ let telaInicial = document.getElementById("tela-inicial");
 let startBtn = document.getElementById("start-btn");
 const btnSair = document.getElementById("btn-sair-edicao");
 
-// ========== Funções salvar / carregar ==========
+/* ========== Funções salvar / carregar ========== */
 function salvarPerguntas(){ localStorage.setItem("perguntasQuiz", JSON.stringify(perguntas)); }
 function carregarPerguntas(){ const dados = localStorage.getItem("perguntasQuiz"); if(dados){ perguntas = JSON.parse(dados); atualizarCadastro(); } }
 carregarPerguntas();
 
-// ========== Login professor ==========
+/* ========== Login professor ========== */
 function entrarProfessor(){
   const senha = document.getElementById("senha-professor").value;
   if(senha === "2702"){
@@ -188,7 +258,7 @@ function sairEdicao(){
   btnSair.style.display = "none";
 }
 
-// ========== Adicionar pergunta ==========
+/* ========== Adicionar pergunta ========== */
 function adicionarPergunta(){
   const pergunta = document.getElementById("nova-pergunta").value.trim();
   const opcoes = [
@@ -210,7 +280,7 @@ function adicionarPergunta(){
   salvarPerguntas();
 }
 
-// Atualiza lista de perguntas no painel do professor
+/* Atualiza lista de perguntas no painel do professor */
 function atualizarCadastro(){
   const cadastro = document.getElementById("cadastro-perguntas");
   cadastro.querySelectorAll("div.pergunta-item")?.forEach(el=>el.remove());
@@ -237,7 +307,7 @@ function atualizarCadastro(){
   });
 }
 
-// ========== Desativa apenas os botões da pergunta atual ==========
+/* ========== Desativa apenas os botões da pergunta atual ========== */
 function desativarRespostasAtuais(){
   const botoes = document.querySelectorAll("#answers button");
   botoes.forEach(btn => {
@@ -245,7 +315,7 @@ function desativarRespostasAtuais(){
   });
 }
 
-// ========== Escrever no quadro (animação da professora) ==========
+/* ========== Escrever no quadro (animação da professora) ========== */
 let escreverIntervalo = null;
 async function escreverNoQuadro(elemento, texto){
   elemento.textContent = "";
@@ -268,7 +338,7 @@ async function escreverNoQuadro(elemento, texto){
   });
 }
 
-// ========== Mostrar pergunta ==========
+/* ========== Mostrar pergunta ========== */
 async function mostrarPergunta(){
   if(!perguntas.length) return;
   const q = perguntas[indice];
@@ -313,7 +383,6 @@ async function mostrarPergunta(){
       feedback.textContent = "Muito bem!";
       feedback.className = "feedback correct";
       professorEl.style.backgroundImage = `url(${imgCerta})`;
-      // não executar jump novamente para não ficar repetitivo, mantemos imagem
     } else {
       feedback.textContent = "Tente novamente!";
       feedback.className = "feedback wrong";
@@ -328,7 +397,7 @@ async function mostrarPergunta(){
   }
 }
 
-// ========== Checar resposta ==========
+/* ========== Checar resposta ========== */
 function checkAnswer(certa, choiceIndex){
   // marca no registro respostasRespondidas pro caso de voltar depois
   perguntasRespondidas[indice] = { choice: choiceIndex, correct: certa };
@@ -363,7 +432,7 @@ function checkAnswer(certa, choiceIndex){
   }
 }
 
-// ========== Start botão ==========
+/* ========== Start botão ========== */
 startBtn.onclick = ()=>{
   if(perguntas.length === 0) return alert("Adicione pelo menos uma pergunta!");
   telaInicial.style.opacity = 0; startBtn.style.opacity = 0;
@@ -372,6 +441,8 @@ startBtn.onclick = ()=>{
     document.getElementById("professor-login").style.display = "none";
     document.getElementById("cadastro-perguntas").style.display = "none";
     btnSair.style.display = 'none';
+    // esconder controles de áudio (conforme pedido: só na tela inicial)
+    document.getElementById("controle-audio").style.display = "none";
     quizContainer.style.display = "flex";
     setTimeout(()=> quizContainer.style.opacity = 1, 50);
     professorEl.style.display = "block";
@@ -380,7 +451,7 @@ startBtn.onclick = ()=>{
   }, 600);
 };
 
-// ========== Navegação: avançar / voltar / terminar ==========
+/* ========== Navegação: avançar / voltar / terminar ========== */
 document.getElementById("btn-avancar-pergunta").onclick = ()=>{
   if(indice < perguntas.length - 1){
     indice++;
@@ -395,7 +466,7 @@ document.getElementById("btn-voltar-pergunta").onclick = ()=>{
 };
 document.getElementById("btn-terminar").onclick = ()=>{ mostrarFim(); };
 
-// ========== Mostrar fim ==========
+/* ========== Mostrar fim ========== */
 function mostrarFim(){
   quizContainer.style.display = "none";
 
@@ -441,7 +512,7 @@ function mostrarFim(){
   document.body.appendChild(fimDiv);
 }
 
-// ========== Resetar jogo ==========
+/* ========== Resetar jogo ========== */
 function resetarJogo(){
   // limpa registro de respostas para novo jogo
   perguntasRespondidas = {};
@@ -450,15 +521,24 @@ function resetarJogo(){
   professorEl.style.display = "block"; professorEl.style.backgroundImage = `url(${imgFrames[0]})`; professorEl.style.animation = "idle 3s ease-in-out infinite";
   document.getElementById("question").textContent = ""; document.getElementById("answers").innerHTML = ""; feedback.textContent = "";
   const fimExistente = document.getElementById("tela-fim"); if(fimExistente) fimExistente.remove();
+
+  // reaparecer controles de áudio na tela inicial
+  document.getElementById("controle-audio").style.display = "flex";
+  // ajustar qual imagem mostrar conforme estado atual do áudio
+  if(musica.muted){
+    btnUserOn.style.display = 'none';
+    btnUserOff.style.display = 'inline-block';
+  } else {
+    btnUserOn.style.display = 'inline-block';
+    btnUserOff.style.display = 'none';
+  }
 }
 
-// ESC para sair do modo professor
+/* ESC para sair do modo professor */
 document.addEventListener('keydown',(e)=>{ if(e.key === 'Escape'){ sairEdicao(); } });
 
-// Caso o usuário recarregue a página, tenta restaurar perguntas (mas não respostasRespondidas)
-window.addEventListener('load', ()=>{
-  carregarPerguntas(); // garante que a lista carregue se existir
-});
+/* Caso o usuário recarregue a página, tenta restaurar perguntas (mas não respostasRespondidas) */
+window.addEventListener('load', ()=>{ carregarPerguntas(); });
 </script>
 </body>
 </html>
